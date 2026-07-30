@@ -31,6 +31,8 @@ export function SideBar() {
           <span>Register WFH</span>
         </Link>
       </nav>
+
+      {/* User icon + display name at the bottom of the sidebar */}
     </aside>
   );
 }
