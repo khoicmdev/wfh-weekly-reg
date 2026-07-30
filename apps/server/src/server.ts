@@ -1,19 +1,35 @@
+import "dotenv/config";
 import cors from "cors";
 import express, { type Request, type Response } from "express";
+import { authRouter } from "./routes/auth.routes.js";
 
-const app = express();
-app.use(cors());
+export const app = express();
+
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN ?? "http://localhost:3000",
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 app.use(express.json());
 
-// --- STATUS ENDPOINT ---
-app.get("/api/status", (req: Request, res: Response) => {
+// ── Routes ────────────────────────────────────────────────────────────────────
+
+app.get("/api/status", (_req: Request, res: Response) => {
   res.json({ status: `Server is running: ${new Date().toISOString()}` });
 });
 
-const PORT = 3001;
-app.listen(PORT, () => {
-  console.log(
-    `       \nExpressJS started at ${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}\n`,
-  );
-  console.log(`       -> Local: http://localhost:${PORT}\n`);
-});
+app.use("/api/v1/auth", authRouter);
+
+// ── Local dev server (not used in Cloud Functions) ────────────────────────────
+
+if (process.env.NODE_ENV !== "production") {
+  const PORT = Number(process.env.PORT ?? 3001);
+  app.listen(PORT, () => {
+    console.log(
+      `\nExpressJS started at ${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}\n`,
+    );
+    console.log(`  -> Local: http://localhost:${PORT}\n`);
+  });
+}

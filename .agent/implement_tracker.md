@@ -49,8 +49,8 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 
 ### `apps/server`
 
-- [ ] **[MODIFY] `package.json`** — add `firebase-admin`, `dotenv`
-- [ ] **[NEW] `.env`** — populate with Firebase credentials (gitignored)
+- [x] **[MODIFY] `package.json`** — add `firebase-admin`, `dotenv`
+- [x] **[NEW] `.env`** — populate with Firebase credentials (gitignored)
   ```
   FIREBASE_PROJECT_ID=wfh-weekly-register
   FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@wfh-weekly-register.iam.gserviceaccount.com
@@ -59,14 +59,14 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
   PORT=3001
   CORS_ORIGIN=http://localhost:3000
   ```
-- [ ] **[NEW] `src/lib/firebase-admin.ts`** — init Admin SDK, export `adminAuth` + `adminDb`
-- [ ] **[NEW] `src/middleware/auth.middleware.ts`** — `verifyToken`: Bearer → `verifyIdToken()` → `req.user`
-- [ ] **[NEW] `src/routes/auth.routes.ts`** — endpoints:
+- [x] **[NEW] `src/lib/firebase-admin.ts`** — init Admin SDK, export `adminAuth` + `adminDb`
+- [x] **[NEW] `src/middleware/auth.middleware.ts`** — `verifyToken`: Bearer → `verifyIdToken()` → `req.user`
+- [x] **[NEW] `src/routes/auth.routes.ts`** — endpoints:
   - `POST /api/v1/auth/register` — `adminAuth.createUser()` + Firestore `users/{uid}` doc (`displayName: null`)
   - `POST /api/v1/auth/login` — Firebase Auth REST `signInWithPassword` → returns `{ token, refreshToken }`
   - `GET /api/v1/auth/me` *(protected)* — returns Firestore `users/{uid}`
   - `PATCH /api/v1/auth/me` *(protected)* — updates `displayName` in Firebase Auth + Firestore
-- [ ] **[MODIFY] `src/server.ts`** — load dotenv, mount `authRouter`, restrict CORS to `CORS_ORIGIN`
+- [x] **[MODIFY] `src/server.ts`** — load dotenv, mount `authRouter`, restrict CORS to `CORS_ORIGIN`
 
 **✅ Gate:** Register → user visible in Firebase Console. Login → valid `idToken`. `PATCH /me` → displayName updated in both places.
 
@@ -293,10 +293,10 @@ apps/
 
 | # | Check | Phase | Status |
 |---|---|---|---|
-| 1 | `POST /api/v1/auth/register` creates user in Firebase Auth console | 1 | [ ] |
-| 2 | `POST /api/v1/auth/login` returns valid `idToken` | 1 | [ ] |
-| 3 | `GET /api/v1/auth/me` returns user profile | 1 | [ ] |
-| 4 | `PATCH /api/v1/auth/me` updates displayName in Firebase Auth + Firestore | 1 | [ ] |
+| 1 | `POST /api/v1/auth/register` creates user in Firebase Auth console | 1 | [x] |
+| 2 | `POST /api/v1/auth/login` returns valid `idToken` | 1 | [x] |
+| 3 | `GET /api/v1/auth/me` returns user profile | 1 | [x] |
+| 4 | `PATCH /api/v1/auth/me` updates displayName in Firebase Auth + Firestore | 1 | [x] |
 | 5 | Weekend date `POST /schedules` → 400 | 2 | [ ] |
 | 6 | 5 sequential POSTs → `registrationOrder` 1–5; 6th → 409 | 2 | [ ] |
 | 7 | `DELETE` on past/today WFH date → 400 | 2 | [ ] |
