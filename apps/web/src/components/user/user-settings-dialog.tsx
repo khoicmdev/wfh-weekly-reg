@@ -47,11 +47,17 @@ export function UserSettingsDialog({
   const email = auth?.user.email ?? "";
 
   const [nameInput, setNameInput] = useState(displayName);
+  const [preference, setPreference] = useState<"monthly" | "biweekly" | "weekly">(
+    auth?.user.registerPreference ?? "monthly"
+  );
   const [isSaving, setIsSaving] = useState(false);
 
-  // Keep nameInput in sync when dialog opens (in case auth changed externally)
+  // Keep state in sync when dialog opens
   function handleOpenChange(next: boolean) {
-    if (next) setNameInput(auth?.user.displayName ?? "");
+    if (next) {
+      setNameInput(auth?.user.displayName ?? "");
+      setPreference(auth?.user.registerPreference ?? "monthly");
+    }
     onOpenChange(next);
   }
 
@@ -65,20 +71,20 @@ export function UserSettingsDialog({
 
     setIsSaving(true);
     try {
-      await apiClient<{ message: string; displayName: string }>(
+      await apiClient<{ message: string; displayName: string; registerPreference: string }>(
         "/api/v1/auth/me",
-        { method: "PATCH", body: { displayName: trimmed } }
+        { method: "PATCH", body: { displayName: trimmed, registerPreference: preference } }
       );
 
       const current = getStoredAuth();
       if (current) {
         setStoredAuth({
           ...current,
-          user: { ...current.user, displayName: trimmed },
+          user: { ...current.user, displayName: trimmed, registerPreference: preference },
         });
       }
 
-      toast.success("Profile updated.");
+      toast.success("Settings updated.");
       onUpdated?.(trimmed);
       onOpenChange(false);
     } catch (err) {
@@ -104,7 +110,7 @@ export function UserSettingsDialog({
         <DialogHeader>
           <DialogTitle>Account settings</DialogTitle>
           <DialogDescription>
-            Update your display name or sign out.
+            Update your profile details and preferences.
           </DialogDescription>
         </DialogHeader>
 
@@ -138,6 +144,21 @@ export function UserSettingsDialog({
               maxLength={50}
               required
             />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="settings-register-preference">Register preference</Label>
+            <select
+              id="settings-register-preference"
+              value={preference}
+              onChange={(e) => setPreference(e.target.value as "monthly" | "biweekly" | "weekly")}
+              disabled={isSaving}
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground cursor-pointer"
+            >
+              <option value="monthly">Monthly</option>
+              <option value="biweekly">Biweekly</option>
+              <option value="weekly">Weekly</option>
+            </select>
           </div>
 
           <div className="flex flex-col gap-1.5">

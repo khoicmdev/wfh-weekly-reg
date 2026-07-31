@@ -15,6 +15,8 @@ import {
   type WeekInfo,
 } from "../../components/wfh/week-utils";
 
+import { useAuth } from "../../lib/auth.store";
+
 export const registerWfhRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/register",
@@ -22,7 +24,9 @@ export const registerWfhRoute = createRoute({
 });
 
 function RegisterWfhPage() {
-  const [viewMode, setViewMode] = useState<ViewMode>("monthly");
+  const auth = useAuth();
+  const initialPreference: ViewMode = auth?.user.registerPreference ?? "monthly";
+  const [viewMode, setViewMode] = useState<ViewMode>(initialPreference);
 
   // State for monthly view
   const today = getTodayLocal();

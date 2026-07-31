@@ -28,7 +28,9 @@ const UpdateProfileSchema = z.object({
     .string()
     .min(2, "Display name must be at least 2 characters")
     .max(50, "Display name must be at most 50 characters")
-    .trim(),
+    .trim()
+    .optional(),
+  registerPreference: z.enum(["monthly", "biweekly", "weekly"]).optional(),
 });
 
 // ── POST /api/v1/auth/send-otp ────────────────────────────────────────────────
@@ -267,20 +269,26 @@ authRouter.patch("/me", verifyToken, async (req: Request, res: Response) => {
     return;
   }
 
-  const { displayName } = parsed.data;
+  const { displayName, registerPreference } = parsed.data;
   const uid = req.user!.uid;
 
   try {
-    // Update in Firebase Auth (affects token claims display name)
-    await adminAuth.updateUser(uid, { displayName });
-
-    // Update in Firestore profile doc
-    await adminDb.collection("users").doc(uid).update({
-      displayName,
+    const updateData: Record<string, unknown> = {
       updatedAt: new Date().toISOString(),
-    });
+    };
 
-    res.json({ message: "Profile updated.", displayName });
+    if (displayName !== undefined) {
+      updateData.displayName = displayName;
+      await adminAuth.updateUser(uid, { displayName });
+    }
+
+    if (registerPreference !== undefined) {
+      updateData.registerPreference = registerPreference;
+    }
+
+    await adminDb.collection("users").doc(uid).update(updateData);
+
+    res.json({ message: "Profile updated.", displayName, registerPreference });
   } catch (err) {
     console.error("[update-me]", err);
     res.status(500).json({ error: "Failed to update profile." });

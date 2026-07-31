@@ -6,6 +6,7 @@ export interface AuthUser {
   uid: string;
   email: string;
   displayName: string | null;
+  registerPreference?: "monthly" | "biweekly" | "weekly";
 }
 
 export interface AuthState {
