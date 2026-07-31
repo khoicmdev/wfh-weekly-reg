@@ -65,26 +65,40 @@ scheduleRouter.get("/", async (req: Request, res: Response) => {
       });
     }
 
-    const schedules = snapshot.docs
-      .map((doc) => {
-        const data = doc.data();
-        const formattedDate = toDDMMYYYYFormat(data.wfhDate);
-        const order = (data.registrationOrder as number) ?? 1;
+    // Sort all week docs by createdAt ascending
+    const allDocs = snapshot.docs.slice().sort((a, b) => {
+      const aTime = new Date(a.data().createdAt ?? 0).getTime();
+      const bTime = new Date(b.data().createdAt ?? 0).getTime();
+      return aTime - bTime;
+    });
 
-        return {
-          id: doc.id,
-          uid: data.uid,
-          userEmail: data.userEmail,
-          displayName: userProfiles[data.uid] ?? data.displayName ?? null,
-          wfhDate: formattedDate,
-          year: data.year,
-          weekNumber: data.weekNumber,
-          registrationOrder: order,
-          color: getColorByOrder(order),
-          createdAt: data.createdAt,
-        };
-      })
-      .sort((a, b) => a.registrationOrder - b.registrationOrder);
+    // Assign consistent user order (1..N) for each unique user in this week
+    const userOrderMap = new Map<string, number>();
+    for (const doc of allDocs) {
+      const docUid = doc.data().uid as string;
+      if (!userOrderMap.has(docUid)) {
+        userOrderMap.set(docUid, userOrderMap.size + 1);
+      }
+    }
+
+    const schedules = allDocs.map((doc) => {
+      const data = doc.data();
+      const formattedDate = toDDMMYYYYFormat(data.wfhDate);
+      const order = userOrderMap.get(data.uid) ?? 1;
+
+      return {
+        id: doc.id,
+        uid: data.uid,
+        userEmail: data.userEmail,
+        displayName: userProfiles[data.uid] ?? data.displayName ?? null,
+        wfhDate: formattedDate,
+        year: data.year,
+        weekNumber: data.weekNumber,
+        registrationOrder: order,
+        color: getColorByOrder(order),
+        createdAt: data.createdAt,
+      };
+    });
 
     res.json({ year, weekNumber, schedules });
   } catch (err) {
@@ -152,7 +166,22 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
       const userDoc = await transaction.get(userDocRef);
       const displayName = userDoc.exists ? (userDoc.data()?.displayName ?? null) : null;
 
-      const registrationOrder = snapshot.docs.length + 1;
+      // Sort existing docs by createdAt ascending to determine consistent per-user order for this week
+      const existingDocs = snapshot.docs.slice().sort((a, b) => {
+        const aTime = new Date(a.data().createdAt ?? 0).getTime();
+        const bTime = new Date(b.data().createdAt ?? 0).getTime();
+        return aTime - bTime;
+      });
+
+      const userOrderMap = new Map<string, number>();
+      for (const doc of existingDocs) {
+        const docUid = doc.data().uid as string;
+        if (!userOrderMap.has(docUid)) {
+          userOrderMap.set(docUid, userOrderMap.size + 1);
+        }
+      }
+
+      const registrationOrder = userOrderMap.get(uid) ?? (userOrderMap.size + 1);
 
       const scheduleData = {
         uid,
@@ -184,43 +213,42 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
       return;
     }
     console.error("[create-schedule]", err);
-    res.status(500).json({ error: "Failed to register WFH day." });
+    res.status(500).json({ error: "Failed to register WFH." });
   }
 });
 
 // ── DELETE /api/v1/schedules/:id ─────────────────────────────────────────────
 
 scheduleRouter.delete("/:id", async (req: Request, res: Response) => {
-  const scheduleId = String(req.params.id);
+  const id = req.params.id as string;
   const uid = req.user!.uid;
 
   try {
-    const docRef = adminDb.collection("schedules").doc(scheduleId);
+    const docRef = adminDb.collection("schedules").doc(id);
     const doc = await docRef.get();
 
     if (!doc.exists) {
-      res.status(404).json({ error: "Schedule not found." });
+      res.status(404).json({ error: "Schedule entry not found." });
       return;
     }
 
     const data = doc.data()!;
 
-    // Check ownership
     if (data.uid !== uid) {
-      res.status(403).json({ error: "You are not authorized to cancel this registration." });
+      res.status(403).json({ error: "You can only cancel your own WFH registrations." });
       return;
     }
 
-    // Check cancel date lockout: cannot cancel today or past date
-    const wfhDate = toDDMMYYYYFormat(data.wfhDate);
-    if (isPastOrTodayGMT7(wfhDate)) {
-      res.status(400).json({ error: "Cannot cancel WFH for today or past dates." });
+    // Check if the WFH date is in the past or today
+    const formattedDate = toDDMMYYYYFormat(data.wfhDate);
+    if (isPastOrTodayGMT7(formattedDate)) {
+      res.status(400).json({ error: "Cannot cancel past or same-day WFH registrations." });
       return;
     }
 
     await docRef.delete();
 
-    res.json({ message: "WFH registration cancelled." });
+    res.json({ message: "WFH registration cancelled successfully." });
   } catch (err) {
     console.error("[delete-schedule]", err);
     res.status(500).json({ error: "Failed to cancel WFH registration." });

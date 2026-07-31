@@ -102,12 +102,13 @@ wfh-weekly-reg/
 - **Weekly View**: Displays 1 week row.
 - **Today Shortcut**: Snaps calendar view back to the period containing today.
 
-### 2. 🎨 FCFS Color Assignment
-- 1st to register in a week: **Blue** (`#3B82F6`)
-- 2nd to register: **Yellow** (`#EAB308`)
-- 3rd to register: **Green** (`#22C55E`)
-- 4th to register: **Purple** (`#A855F7`)
-- 5th to register: **Orange** (`#F97316`)
+### 2. 🎨 FCFS Per-User Color Assignment
+Each unique user who registers in a given week is assigned one consistent color pill across all their registered days in that week:
+- 1st unique person to register in a week: **Blue** (`#3B82F6`)
+- 2nd unique person to register in a week: **Yellow** (`#EAB308`)
+- 3rd unique person to register in a week: **Green** (`#22C55E`)
+- 4th unique person to register in a week: **Purple** (`#A855F7`)
+- 5th unique person to register in a week: **Orange** (`#F97316`)
 
 ### 3. 📊 Dashboard
 - Stacks 3 real-time metric cards vertically in 3 rows:
