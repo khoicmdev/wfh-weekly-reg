@@ -80,6 +80,7 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 
 - [x] **[NEW] `src/lib/color.util.ts`** — `registrationOrder` (1–5) → `{ name, hex }` (Blue/Yellow/Green/Purple/Orange)
 - [x] **[NEW] `src/lib/date.util.ts`** — GMT+7-aware helpers: `getISOWeek()`, `isWeekend()`, `isPastOrToday()` (`DD-MM-YYYY` support)
+- [x] **[NEW] `src/lib/date.util.test.ts`** — unit tests for date & color utilities (5 passing tests via `npm test`)
 - [x] **[NEW] `src/routes/schedule.routes.ts`** — endpoints:
   - `GET /api/v1/schedules?year=&weekNumber=` *(protected)* — team schedule annotated with colors
   - `POST /api/v1/schedules` *(protected)* — body `{ wfhDate }`: validate date, reject weekend (400), reject duplicate user+week (409), assign `registrationOrder`, save to Firestore
@@ -249,6 +250,7 @@ apps/
         firebase-admin.ts                           [NEW — Phase 1]
         color.util.ts                               [NEW — Phase 2]
         date.util.ts                                [NEW — Phase 2]
+        date.util.test.ts                           [NEW — Phase 2]
       middleware/
         auth.middleware.ts                          [NEW — Phase 1]
       routes/
@@ -257,7 +259,7 @@ apps/
         dashboard.routes.ts                         [NEW — Phase 2]
       index.ts                                      [NEW — Phase 7]
       server.ts                                     [MODIFY — Phase 1, 2, 7]
-    package.json                                    [MODIFY — Phase 1, 7]
+    package.json                                    [MODIFY — Phase 1, 2, 7]
 
   web/
     .env                                            [NEW — Phase 3, gitignored]
