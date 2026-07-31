@@ -9,6 +9,14 @@
     ]
   },
   "functions": {
-    "source": "apps/server"
+    "source": "apps/server",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "firebase-debug.log",
+      "firebase-debug.*.log",
+      ".env",
+      ".env.*"
+    ]
   }
 }

@@ -1,4 +1,6 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+dotenv.config();
 import cors from "cors";
 import express, { type Request, type Response } from "express";
 import { authRouter } from "./routes/auth.routes.js";
@@ -28,7 +30,12 @@ app.use("/api/v1/dashboard", dashboardRouter);
 
 // ── Local dev server (not used in Cloud Functions) ────────────────────────────
 
-if (process.env.NODE_ENV !== "production") {
+if (
+  process.env.NODE_ENV !== "production" &&
+  !process.env.FUNCTION_TARGET &&
+  !process.env.K_SERVICE &&
+  !process.env.FUNCTIONS_EMULATOR
+) {
   const PORT = Number(process.env.PORT ?? 3001);
   app.listen(PORT, () => {
     console.log(

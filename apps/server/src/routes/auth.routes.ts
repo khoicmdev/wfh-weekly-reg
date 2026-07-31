@@ -143,10 +143,15 @@ authRouter.post("/login", async (req: Request, res: Response) => {
 
   const { email, password } = parsed.data;
 
+  const apiKey =
+    process.env.WEB_API_KEY ||
+    process.env.FIREBASE_WEB_API_KEY ||
+    "AIzaSyAv5i6KjmcoxB8hJfZwkH7tScNfk0dJwAE";
+
   try {
     // Call Firebase Auth REST API to exchange email/password for an idToken
     const firebaseRes = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_WEB_API_KEY}`,
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
