@@ -24,13 +24,14 @@
     "express": "^5.2.1",
     "firebase-admin": "^13.4.0",
     "firebase-functions": "^6.3.0",
-    "resend": "^6.18.1",
+    "nodemailer": "^9.0.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^26.1.1",
+    "@types/nodemailer": "^8.0.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2"

@@ -56,13 +56,15 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
   FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@wfh-weekly-register.iam.gserviceaccount.com
   FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
   FIREBASE_WEB_API_KEY=AIzaSyAv5i6KjmcoxB8hJfZwkH7tScNfk0dJwAE
+  SMTP_USER=your.email@gmail.com
+  SMTP_PASS=your-16-char-app-password
   PORT=3001
   CORS_ORIGIN=http://localhost:3000
   ```
 - [x] **[NEW] `src/lib/firebase-admin.ts`** — init Admin SDK, export `adminAuth` + `adminDb`
 - [x] **[NEW] `src/middleware/auth.middleware.ts`** — `verifyToken`: Bearer → `verifyIdToken()` → `req.user`
 - [x] **[NEW] `src/routes/auth.routes.ts`** — endpoints:
-  - `POST /api/v1/auth/send-otp` — generates random 6-digit OTP, stores in Firestore `email_otps/{email}` with 10-min expiration
+  - `POST /api/v1/auth/send-otp` — generates random 6-digit OTP, stores in Firestore `email_otps/{email}` with 10-min expiration, dispatches HTML email via Gmail SMTP (`nodemailer`)
   - `POST /api/v1/auth/register` — verifies 6-digit OTP before `adminAuth.createUser()` + Firestore `users/{uid}` doc
   - `POST /api/v1/auth/login` — Firebase Auth REST `signInWithPassword` → returns `{ token, refreshToken }`
   - `GET /api/v1/auth/me` *(protected)* — returns Firestore `users/{uid}`

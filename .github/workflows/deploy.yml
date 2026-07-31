@@ -129,3 +129,6 @@ jobs:
 
       - name: Deploy Cloud Functions to Firebase
         run: npx firebase-tools deploy --only functions --project wfh-weekly-register
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}

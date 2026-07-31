@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { adminAuth, adminDb } from "../lib/firebase-admin.js";
 import { verifyToken } from "../middleware/auth.middleware.js";
 
@@ -70,13 +70,22 @@ authRouter.post("/send-otp", async (req: Request, res: Response) => {
     console.log(`🔑 VERIFICATION CODE FOR ${email}: ${code}`);
     console.log(`========================================\n`);
 
-    // Dispatch email via Resend if RESEND_API_KEY is present
-    const resendApiKey = process.env.RESEND_API_KEY;
-    if (resendApiKey) {
+    // Dispatch email via Gmail SMTP (Nodemailer) if SMTP_USER and SMTP_PASS are present
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    if (smtpUser && smtpPass) {
       try {
-        const resend = new Resend(resendApiKey);
-        await resend.emails.send({
-          from: "TLG Legal <onboarding@resend.dev>",
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: smtpUser,
+            pass: smtpPass,
+          },
+        });
+
+        await transporter.sendMail({
+          from: `"TLG Legal" <${smtpUser}>`,
           to: email,
           subject: `${code} is your TLG Legal verification code`,
           html: `
@@ -90,10 +99,13 @@ authRouter.post("/send-otp", async (req: Request, res: Response) => {
             </div>
           `,
         });
-        console.log(`✉️ Email successfully dispatched via Resend to ${email}`);
+
+        console.log(`✉️ Email successfully dispatched via Gmail SMTP to ${email}`);
       } catch (emailErr) {
-        console.error("[resend-email-error]", emailErr);
+        console.error("[smtp-email-exception]", emailErr);
       }
+    } else {
+      console.warn("⚠️ SMTP_USER or SMTP_PASS is missing in process.env.");
     }
 
     res.json({ message: "Verification code sent to your email." });

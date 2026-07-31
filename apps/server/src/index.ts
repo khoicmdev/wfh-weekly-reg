@@ -6,7 +6,6 @@ export const api = onRequest(
     region: "asia-southeast1",
     cors: true,
     invoker: "public",
-    secrets: ["RESEND_API_KEY"],
   },
   app
 );
