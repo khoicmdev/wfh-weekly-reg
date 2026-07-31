@@ -2,6 +2,8 @@ import "dotenv/config";
 import cors from "cors";
 import express, { type Request, type Response } from "express";
 import { authRouter } from "./routes/auth.routes.js";
+import { scheduleRouter } from "./routes/schedule.routes.js";
+import { dashboardRouter } from "./routes/dashboard.routes.js";
 
 export const app = express();
 
@@ -21,6 +23,8 @@ app.get("/api/status", (_req: Request, res: Response) => {
 });
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/schedules", scheduleRouter);
+app.use("/api/v1/dashboard", dashboardRouter);
 
 // ── Local dev server (not used in Cloud Functions) ────────────────────────────
 

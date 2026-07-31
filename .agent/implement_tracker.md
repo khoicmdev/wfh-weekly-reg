@@ -78,14 +78,14 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 
 ### `apps/server`
 
-- [ ] **[NEW] `src/lib/color.util.ts`** — `registrationOrder` (1–5) → `{ name, hex }` (Blue/Yellow/Green/Purple/Orange)
-- [ ] **[NEW] `src/lib/date.util.ts`** — GMT+7-aware helpers: `getISOWeek()`, `isWeekend()`, `isPastOrToday()`
-- [ ] **[NEW] `src/routes/schedule.routes.ts`** — endpoints:
+- [x] **[NEW] `src/lib/color.util.ts`** — `registrationOrder` (1–5) → `{ name, hex }` (Blue/Yellow/Green/Purple/Orange)
+- [x] **[NEW] `src/lib/date.util.ts`** — GMT+7-aware helpers: `getISOWeek()`, `isWeekend()`, `isPastOrToday()` (`DD-MM-YYYY` support)
+- [x] **[NEW] `src/routes/schedule.routes.ts`** — endpoints:
   - `GET /api/v1/schedules?year=&weekNumber=` *(protected)* — team schedule annotated with colors
   - `POST /api/v1/schedules` *(protected)* — body `{ wfhDate }`: validate date, reject weekend (400), reject duplicate user+week (409), assign `registrationOrder`, save to Firestore
   - `DELETE /api/v1/schedules/:id` *(protected)* — reject if date is today/past (400), verify ownership (403), delete
-- [ ] **[NEW] `src/routes/dashboard.routes.ts`** — `GET /api/v1/dashboard/stats` *(protected)*: `{ nextWfhDate, wfhDaysCountThisMonth, wfhDaysCountThisYear }` in GMT+7
-- [ ] **[MODIFY] `src/server.ts`** — mount `scheduleRouter`, `dashboardRouter`
+- [x] **[NEW] `src/routes/dashboard.routes.ts`** — `GET /api/v1/dashboard/stats` *(protected)*: `{ nextWfhDate, wfhDaysCountThisMonth, wfhDaysCountThisYear }` in GMT+7
+- [x] **[MODIFY] `src/server.ts`** — mount `scheduleRouter`, `dashboardRouter`
 
 **✅ Gate:** Weekend POST → 400. 5 POSTs → `registrationOrder` 1–5. 6th → 409. DELETE past date → 400. GET returns colors correctly.
 
@@ -297,10 +297,10 @@ apps/
 | 2 | `POST /api/v1/auth/login` returns valid `idToken` | 1 | [x] |
 | 3 | `GET /api/v1/auth/me` returns user profile | 1 | [x] |
 | 4 | `PATCH /api/v1/auth/me` updates displayName in Firebase Auth + Firestore | 1 | [x] |
-| 5 | Weekend date `POST /schedules` → 400 | 2 | [ ] |
-| 6 | 5 sequential POSTs → `registrationOrder` 1–5; 6th → 409 | 2 | [ ] |
-| 7 | `DELETE` on past/today WFH date → 400 | 2 | [ ] |
-| 8 | All API dates returned in GMT+7 | 2 | [ ] |
+| 5 | Weekend date `POST /schedules` → 400 | 2 | [x] |
+| 6 | 5 sequential POSTs → `registrationOrder` 1–5; 6th → 409 | 2 | [x] |
+| 7 | `DELETE` on past/today WFH date → 400 | 2 | [x] |
+| 8 | All API dates returned in GMT+7 | 2 | [x] |
 | 9 | Unauthenticated visit to `/` → `/login` | 3 | [ ] |
 | 10 | Bad credentials → error toast | 3 | [ ] |
 | 11 | New user (no displayName) → onboarding dialog immediately after login | 4 | [ ] |
