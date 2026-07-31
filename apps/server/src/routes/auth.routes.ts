@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
+import { Resend } from "resend";
 import { adminAuth, adminDb } from "../lib/firebase-admin.js";
 import { verifyToken } from "../middleware/auth.middleware.js";
 
@@ -68,6 +69,32 @@ authRouter.post("/send-otp", async (req: Request, res: Response) => {
     console.log(`\n========================================`);
     console.log(`🔑 VERIFICATION CODE FOR ${email}: ${code}`);
     console.log(`========================================\n`);
+
+    // Dispatch email via Resend if RESEND_API_KEY is present
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (resendApiKey) {
+      try {
+        const resend = new Resend(resendApiKey);
+        await resend.emails.send({
+          from: "TLG Legal <onboarding@resend.dev>",
+          to: email,
+          subject: `${code} is your TLG Legal verification code`,
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+              <h2 style="color: #1e3a8a; font-size: 20px; font-weight: 700; margin-top: 0;">TLG Legal Verification Code</h2>
+              <p style="color: #475569; font-size: 14px; line-height: 1.5;">Your 6-digit verification code to complete your registration is:</p>
+              <div style="text-align: center; margin: 24px 0; padding: 16px; background-color: #f1f5f9; border-radius: 8px;">
+                <span style="font-family: monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #1e3a8a;">${code}</span>
+              </div>
+              <p style="color: #64748b; font-size: 13px;">This code will expire in 10 minutes. If you did not request this code, please ignore this email.</p>
+            </div>
+          `,
+        });
+        console.log(`✉️ Email successfully dispatched via Resend to ${email}`);
+      } catch (emailErr) {
+        console.error("[resend-email-error]", emailErr);
+      }
+    }
 
     res.json({ message: "Verification code sent to your email." });
   } catch (err) {
