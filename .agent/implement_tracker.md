@@ -13,6 +13,7 @@
 | Self-registration | Any valid email can register |
 | Date/Time | English UI, all dates/times in **GMT+7 (Asia/Ho_Chi_Minh)** |
 | Cancel/Edit WFH | Allowed **before the WFH day arrives** (server-enforced) |
+| Theme / Dark Mode | Instant Light/Dark mode switcher via shadcn `Switch` component in `@repo/ui` |
 | WFH Registration Limit | Full-week & multi-day WFH registrations allowed (per-date duplicate check) |
 | Deployment — Frontend | **Firebase Hosting** |
 | Deployment — Backend | **Firebase Cloud Functions v2** (`asia-southeast1`) |

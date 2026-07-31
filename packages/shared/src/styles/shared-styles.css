@@ -11,7 +11,7 @@
   --popover: #ffffff;
   --popover-foreground: #09090b;
 
-  --primary: #6366f1;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
 
   --secondary: #475569;
@@ -31,39 +31,42 @@
 
   --border: #e4e4e7;
   --input: #e4e4e7;
-  --ring: #6366f1;
+  --ring: #2563eb;
 
   --radius: 0.5rem;
 }
 
 .dark {
   --background: #09090b;
-  --foreground: #fafafa;
+  --foreground: #f4f4f5;
 
-  --card: #09090b;
-  --card-foreground: #fafafa;
+  --card: #121215;
+  --card-foreground: #f4f4f5;
 
-  --popover: #09090b;
-  --popover-foreground: #fafafa;
+  --popover: #121215;
+  --popover-foreground: #f4f4f5;
 
-  --primary: #6366f1;
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
 
   --secondary: #27272a;
-  --secondary-foreground: #fafafa;
+  --secondary-foreground: #f4f4f5;
 
-  --muted: #27272a;
+  --tertiary: #10b981;
+  --neutral: #18181b;
+
+  --muted: #18181b;
   --muted-foreground: #a1a1aa;
 
-  --accent: #27272a;
-  --accent-foreground: #fafafa;
+  --accent: #1e1e24;
+  --accent-foreground: #f4f4f5;
 
-  --destructive: #7f1d1d;
-  --destructive-foreground: #fafafa;
+  --destructive: #991b1b;
+  --destructive-foreground: #f4f4f5;
 
   --border: #27272a;
   --input: #27272a;
-  --ring: #6366f1;
+  --ring: #3b82f6;
 }
 
 @theme {
@@ -108,4 +111,10 @@
   --font-label: "JetBrains Mono", monospace;
   --font-sans: Geist, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }

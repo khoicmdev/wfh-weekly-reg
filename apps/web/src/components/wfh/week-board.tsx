@@ -64,23 +64,23 @@ function DayColumn({
           isDisabled ? "cursor-not-allowed" : ""
         } ${
           isOutsideMonth
-            ? "bg-slate-100/60 border-slate-200 opacity-40 select-none"
+            ? "bg-slate-100/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-40 select-none"
             : isWeekend
-            ? "bg-slate-50 border-slate-200 opacity-60"
+            ? "bg-slate-50/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 opacity-60"
             : isToday
-            ? "bg-blue-50/60 border-blue-200"
-            : "bg-white border-border hover:border-slate-300"
+            ? "bg-blue-50/60 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800"
+            : "bg-card border-border hover:border-slate-300 dark:hover:border-slate-700"
         }`}
       >
         {/* Header */}
         <div
           className={`px-3 pt-3 pb-2 border-b ${
             isOutsideMonth
-              ? "border-slate-200"
+              ? "border-slate-200 dark:border-slate-800"
               : isWeekend
-              ? "border-slate-200"
+              ? "border-slate-200 dark:border-slate-800"
               : isToday
-              ? "border-blue-200"
+              ? "border-blue-200 dark:border-blue-800"
               : "border-border"
           }`}
         >

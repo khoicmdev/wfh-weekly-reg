@@ -12,6 +12,7 @@ export * from "./src/components/ui/command";
 export * from "./src/components/ui/dialog";
 export * from "./src/components/ui/combobox";
 export * from "./src/components/ui/checkbox";
+export * from "./src/components/ui/switch";
 export * from "./src/components/ui/sonner";
 
 // Utilities

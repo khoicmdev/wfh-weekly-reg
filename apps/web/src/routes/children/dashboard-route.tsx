@@ -130,19 +130,19 @@ function DashboardPage() {
             />
 
             <StatCard
-              icon={<CalendarDays className="w-5 h-5 text-violet-600" />}
+              icon={<CalendarDays className="w-5 h-5 text-violet-600 dark:text-violet-400" />}
               label="This Month"
               value={data?.wfhDaysCountThisMonth ?? 0}
               subtext="WFH days registered this month"
-              accent="bg-violet-100"
+              accent="bg-violet-100 dark:bg-violet-950/50"
             />
 
             <StatCard
-              icon={<BarChart3 className="w-5 h-5 text-emerald-600" />}
+              icon={<BarChart3 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />}
               label="This Year"
               value={data?.wfhDaysCountThisYear ?? 0}
               subtext="Total WFH days this year"
-              accent="bg-emerald-100"
+              accent="bg-emerald-100 dark:bg-emerald-950/50"
             />
           </>
         )}

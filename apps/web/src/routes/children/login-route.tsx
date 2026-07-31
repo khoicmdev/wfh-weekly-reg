@@ -56,13 +56,13 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 transition-colors">
       <div className="w-full max-w-[420px] flex flex-col gap-6">
         {/* Brand */}
         <div className="flex flex-col items-center gap-1">
           <div className="flex items-center gap-2">
             <img src="/tlg_ico.png" alt="TLG Logo" className="h-8 w-auto object-contain shrink-0" />
-            <h1 className="text-2xl font-bold text-blue-900 tracking-tight">TLG Legal</h1>
+            <h1 className="text-2xl font-bold text-blue-900 dark:text-blue-400 tracking-tight">TLG Legal</h1>
           </div>
           <p className="text-sm text-muted-foreground">WFH Weekly Registration</p>
         </div>
