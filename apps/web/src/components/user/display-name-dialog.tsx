@@ -11,15 +11,10 @@ import {
   Label,
 } from "@repo/ui";
 import { apiClient } from "../../lib/api-client";
-import { getStoredAuth, setStoredAuth } from "../../lib/auth.store";
+import { getStoredAuth, setStoredAuth, useAuth } from "../../lib/auth.store";
 
-interface DisplayNameDialogProps {
-  /** Called after display name is saved so the parent can refresh auth state */
-  onSaved: (displayName: string) => void;
-}
-
-export function DisplayNameDialog({ onSaved }: DisplayNameDialogProps) {
-  const auth = getStoredAuth();
+export function DisplayNameDialog() {
+  const auth = useAuth();
   // Only show when authenticated and displayName is null
   const open = auth !== null && auth.user.displayName === null;
 
@@ -41,7 +36,7 @@ export function DisplayNameDialog({ onSaved }: DisplayNameDialogProps) {
         { method: "PATCH", body: { displayName: trimmed } }
       );
 
-      // Persist updated display name into stored auth so sidebar reflects it immediately
+      // Persist updated display name into stored auth so sidebar and dialog reflect it immediately
       const current = getStoredAuth();
       if (current) {
         setStoredAuth({
@@ -51,7 +46,6 @@ export function DisplayNameDialog({ onSaved }: DisplayNameDialogProps) {
       }
 
       toast.success(`Welcome, ${trimmed}!`);
-      onSaved(trimmed);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to save name.";
       toast.error(message);

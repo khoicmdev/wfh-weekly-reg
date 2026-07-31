@@ -12,6 +12,7 @@ import {
   Label,
 } from "@repo/ui";
 import { rootRoute } from "../../app";
+import { router } from "../router-config";
 import { apiClient } from "../../lib/api-client";
 import { setStoredAuth, type AuthState } from "../../lib/auth.store";
 
@@ -44,6 +45,7 @@ function LoginPage() {
 
       setStoredAuth(data);
       toast.success("Welcome back!");
+      await router.invalidate();
       await navigate({ to: "/", replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed.";
@@ -57,9 +59,12 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-neutral px-4">
       <div className="w-full max-w-[420px] flex flex-col gap-6">
         {/* Brand */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">TLG Legal</h1>
-          <p className="text-sm text-muted-foreground mt-1">WFH Weekly Registration</p>
+        <div className="flex flex-col items-center gap-1">
+          <div className="flex items-center gap-2">
+            <img src="/tlg_ico.png" alt="TLG Logo" className="h-8 w-auto object-contain shrink-0" />
+            <h1 className="text-2xl font-bold text-blue-900 tracking-tight">TLG Legal</h1>
+          </div>
+          <p className="text-sm text-muted-foreground">WFH Weekly Registration</p>
         </div>
 
         <Card className="gap-0">

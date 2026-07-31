@@ -12,14 +12,15 @@ import {
   Input,
   Label,
 } from "@repo/ui";
+import { router } from "../../routes/router-config";
 import { apiClient } from "../../lib/api-client";
-import { getStoredAuth, setStoredAuth, clearStoredAuth } from "../../lib/auth.store";
+import { getStoredAuth, setStoredAuth, clearStoredAuth, useAuth } from "../../lib/auth.store";
 
 interface UserSettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Called after display name is successfully updated */
-  onUpdated: (displayName: string) => void;
+  onUpdated?: (displayName: string) => void;
 }
 
 /** Derive initials from a display name or fall back to email first letter */
@@ -41,7 +42,7 @@ export function UserSettingsDialog({
   onUpdated,
 }: UserSettingsDialogProps) {
   const navigate = useNavigate();
-  const auth = getStoredAuth();
+  const auth = useAuth();
   const displayName = auth?.user.displayName ?? "";
   const email = auth?.user.email ?? "";
 
@@ -78,7 +79,7 @@ export function UserSettingsDialog({
       }
 
       toast.success("Profile updated.");
-      onUpdated(trimmed);
+      onUpdated?.(trimmed);
       onOpenChange(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to update profile.";
@@ -89,7 +90,9 @@ export function UserSettingsDialog({
   }
 
   async function handleLogout() {
+    onOpenChange(false);
     clearStoredAuth();
+    await router.invalidate();
     await navigate({ to: "/login", replace: true });
   }
 

@@ -25,7 +25,7 @@ if (rootElement) {
         <Provider>
           <HydrateAtoms>
             <RouterProvider router={router} />
-            <Toaster />
+            <Toaster position="top-right" />
           </HydrateAtoms>
         </Provider>
       </QueryClientProvider>
