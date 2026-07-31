@@ -12,12 +12,7 @@
     "turbo": "^2.10.7"
   },
   "name": "with-vite",
-  "devEngines": {
-    "packageManager": {
-      "name": "npm",
-      "version": "11.12.1"
-    }
-  },
+  "packageManager": "npm@10.9.8",
   "workspaces": [
     "apps/*",
     "packages/*"
