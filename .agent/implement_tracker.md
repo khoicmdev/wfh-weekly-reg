@@ -116,20 +116,21 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 
 ### `apps/web`
 
-- [ ] **[NEW] `src/components/user/display-name-dialog.tsx`**
-  - Triggered when `authAtom?.user.displayName === null`
-  - Non-dismissable (no X, no Escape, no outside-click)
-  - "Welcome! What should we call you?" → input (min 2 chars) → `PATCH /api/v1/auth/me` → update `authAtom`
-- [ ] **[NEW] `src/components/user/user-settings-dialog.tsx`**
+- [x] **[NEW] `src/components/user/display-name-dialog.tsx`**
+  - Triggered when `auth.user.displayName === null` (reads localStorage directly)
+  - Non-dismissable (no X, Escape blocked, outside-click blocked)
+  - "Welcome! What should we call you?" → input (min 2 chars) → `PATCH /api/v1/auth/me` → update localStorage + parent state
+- [x] **[NEW] `src/components/user/user-settings-dialog.tsx`**
   - Opens from sidebar user section
   - Shows avatar (initials), editable display name, read-only email
-  - "Save Changes" → `PATCH /api/v1/auth/me` → update `authAtom`
-  - "Log Out" → `clearAuth()` → `/login`
-- [ ] **[MODIFY] `src/components/side-bar.tsx`**
-  - Fix Register WFH `to="/register"`
-  - Add `flex-1` spacer
-  - Add user section at bottom: avatar circle (initials) + display name + email → opens `<UserSettingsDialog>`
-- [ ] **[MODIFY] `src/app.tsx`** — mount `<DisplayNameDialog>` in authenticated layout
+  - "Save Changes" → `PATCH /api/v1/auth/me` → update localStorage
+  - "Log Out" → `clearStoredAuth()` → `/login`
+  - Exports `getInitials()` helper used by sidebar
+- [x] **[MODIFY] `src/components/side-bar.tsx`**
+  - Fixed Register WFH `to="/register"` (cast for Phase 5)
+  - Added `flex-1` spacer
+  - Added user section at bottom: avatar (initials) + display name + email → opens `<UserSettingsDialog>`
+- [x] **[MODIFY] `src/app.tsx`** — mounted `<DisplayNameDialog>` in authenticated layout with `onSaved` state callback
 
 **✅ Gate:** New user → dialog immediately, cannot bypass. Name set → sidebar updates. User click → settings pre-filled. Logout works.
 
@@ -141,13 +142,13 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 
 ### `apps/web`
 
-- [ ] **[NEW] `src/routes/children/dashboard-route.tsx`** — route `/`: fetch `GET /api/v1/dashboard/stats` via React Query
-  - Card: 📅 **Next WFH** — next scheduled date (GMT+7) or "Not scheduled"
+- [x] **[NEW] `src/routes/children/dashboard-route.tsx`** — route `/`: fetch `GET /api/v1/dashboard/stats` via React Query
+  - Card: 📅 **Next WFH** — next scheduled date (GMT+7, formatted) or "Not scheduled"
   - Card: 📆 **This Month** — WFH day count this calendar month
   - Card: 📊 **This Year** — WFH day count this year
-  - Skeleton loaders while fetching
-- [ ] **[NEW] `src/routes/children/register-wfh-route.tsx`** — route `/register` (shell, filled in Phase 6)
-- [ ] **[MODIFY] `src/routes/router-config.tsx`** — register `dashboardRoute`, `registerWfhRoute`
+  - Skeleton loaders while fetching; error banner on failure
+- [x] **[NEW] `src/routes/children/register-wfh-route.tsx`** — route `/register` (shell placeholder, filled in Phase 6)
+- [x] **[MODIFY] `src/routes/router-config.tsx`** — replaced `indexRoute` with `dashboardRoute` at `/`; added `registerWfhRoute`; removed `as any` cast from sidebar `/register` link
 
 **✅ Gate:** Dashboard shows real stats. Sidebar navigation works between tabs.
 
@@ -305,12 +306,12 @@ apps/
 | 8 | All API dates returned in GMT+7 | 2 | [x] |
 | 9 | Unauthenticated visit to `/` → `/login` | 3 | [x] |
 | 10 | Bad credentials → error toast | 3 | [x] |
-| 11 | New user (no displayName) → onboarding dialog immediately after login | 4 | [ ] |
-| 12 | Onboarding dialog cannot be dismissed without entering a name | 4 | [ ] |
-| 13 | Sidebar shows initials + display name after onboarding | 4 | [ ] |
-| 14 | Sidebar user click → settings dialog pre-filled, change works | 4 | [ ] |
-| 15 | Logout → token cleared → `/login` | 4 | [ ] |
-| 16 | Dashboard shows correct stats from API | 5 | [ ] |
+| 11 | New user (no displayName) → onboarding dialog immediately after login | 4 | [x] |
+| 12 | Onboarding dialog cannot be dismissed without entering a name | 4 | [x] |
+| 13 | Sidebar shows initials + display name after onboarding | 4 | [x] |
+| 14 | Sidebar user click → settings dialog pre-filled, change works | 4 | [x] |
+| 15 | Logout → token cleared → `/login` | 4 | [x] |
+| 16 | Dashboard shows correct stats from API | 5 | [x] |
 | 17 | Week board shows correct FCFS colors | 6 | [ ] |
 | 18 | Register on weekday → board updates, button disabled for week | 6 | [ ] |
 | 19 | Cancel future WFH → chip removed from board | 6 | [ ] |

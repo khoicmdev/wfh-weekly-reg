@@ -1,5 +1,7 @@
 import { createRootRoute, Outlet, redirect } from "@tanstack/react-router";
+import { useState } from "react";
 import { SideBar } from "./components/side-bar";
+import { DisplayNameDialog } from "./components/user/display-name-dialog";
 import { getStoredAuth } from "./lib/auth.store";
 
 /** Routes that don't require authentication */
@@ -30,12 +32,15 @@ function RootLayout() {
   const auth = getStoredAuth();
   const isAuthenticated = auth !== null;
 
+  // Track display name state so sidebar + dialog re-render after onboarding
+  const [_displayName, setDisplayName] = useState(auth?.user.displayName ?? null);
+
   if (!isAuthenticated) {
     // Public layout: full-screen, no sidebar
     return <Outlet />;
   }
 
-  // Protected layout: sidebar + main content
+  // Protected layout: sidebar + main content + onboarding dialog
   return (
     <div className="min-h-screen bg-neutral text-secondary font-sans grid grid-cols-[240px_1fr]">
       {/* SideBar Navigation */}
@@ -47,6 +52,9 @@ function RootLayout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Onboarding: shown when user has no display name */}
+      <DisplayNameDialog onSaved={(name) => setDisplayName(name)} />
     </div>
   );
 }
