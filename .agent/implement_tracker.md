@@ -98,13 +98,13 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 
 ### `apps/web`
 
-- [ ] **[NEW] `.env`** — `VITE_API_BASE_URL=http://localhost:3001`
-- [ ] **[NEW] `src/lib/api-client.ts`** — fetch wrapper: base URL from env, Bearer token from localStorage, auto-logout on 401
-- [ ] **[NEW] `src/lib/auth.store.ts`** — Jotai `authAtom: { token, user: { uid, email, displayName } } | null`, persisted to localStorage
-- [ ] **[NEW] `src/routes/children/login-route.tsx`** — route `/login`: email + password form (react-hook-form + zod), sign-in, link to register
-- [ ] **[NEW] `src/routes/children/register-account-route.tsx`** — route `/register-account`: email + password + confirm password
-- [ ] **[MODIFY] `src/app.tsx`** — `beforeLoad` guard (unauthenticated → `/login`); authenticated layout: `<SideBar>` + `<Outlet>` + `<DisplayNameDialog>`
-- [ ] **[MODIFY] `src/routes/router-config.tsx`** — register `loginRoute`, `registerAccountRoute`
+- [x] **[NEW] `.env`** — `VITE_API_BASE_URL=http://localhost:3001`
+- [x] **[NEW] `src/lib/api-client.ts`** — fetch wrapper: base URL from env, Bearer token from localStorage, auto-logout on 401
+- [x] **[NEW] `src/lib/auth.store.ts`** — localStorage helpers: `getStoredAuth()`, `setStoredAuth()`, `clearStoredAuth()` with `AuthState { token, user: { uid, email, displayName } }`
+- [x] **[NEW] `src/routes/children/login-route.tsx`** — route `/login`: email + password form, sign-in, link to register
+- [x] **[NEW] `src/routes/children/register-account-route.tsx`** — route `/register-account`: email + password + confirm password, redirects to `/login`
+- [x] **[MODIFY] `src/app.tsx`** — `beforeLoad` guard (unauthenticated → `/login`, authenticated → skip auth pages); split public layout vs authenticated layout with `<SideBar>`
+- [x] **[MODIFY] `src/routes/router-config.tsx`** — register `loginRoute`, `registerAccountRoute`
 
 **✅ Gate:** Unauthenticated visit → `/login`. Bad credentials → toast. Good credentials → main app. New account → login page.
 
@@ -303,8 +303,8 @@ apps/
 | 6 | 5 sequential POSTs → `registrationOrder` 1–5; 6th → 409 | 2 | [x] |
 | 7 | `DELETE` on past/today WFH date → 400 | 2 | [x] |
 | 8 | All API dates returned in GMT+7 | 2 | [x] |
-| 9 | Unauthenticated visit to `/` → `/login` | 3 | [ ] |
-| 10 | Bad credentials → error toast | 3 | [ ] |
+| 9 | Unauthenticated visit to `/` → `/login` | 3 | [x] |
+| 10 | Bad credentials → error toast | 3 | [x] |
 | 11 | New user (no displayName) → onboarding dialog immediately after login | 4 | [ ] |
 | 12 | Onboarding dialog cannot be dismissed without entering a name | 4 | [ ] |
 | 13 | Sidebar shows initials + display name after onboarding | 4 | [ ] |
