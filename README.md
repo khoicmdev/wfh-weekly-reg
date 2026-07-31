@@ -56,7 +56,7 @@ The project is structured as a **Turborepo monorepo** separating the React SPA f
 
 - **Frontend**: React 19, Vite, TanStack Router, TanStack Query (React Query), Tailwind CSS, Lucide React, Sonner (Toaster), Jotai.
 - **Backend**: Express.js 5, Firebase Admin SDK, Firebase Cloud Functions v2 (`asia-southeast1`), Zod validation.
-- **Monorepo**: Turborepo, npm workspaces, TypeScript.
+- **Monorepo**: Turborepo, npm workspaces, TypeScript (Node.js 22).
 - **CI/CD**: GitHub Actions (`lint` $\rightarrow$ `build` $\rightarrow$ parallel deploy to Firebase Hosting & Functions).
 
 ---
