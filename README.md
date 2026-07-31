@@ -14,7 +14,7 @@ Managing team work-from-home days requires transparency, fairness, and strict da
 
 1. **Fair FCFS Color Badging**: Automatically assigns vibrant color pills (Blue, Yellow, Green, Purple, Orange) to team members based on their registration order for each week.
 2. **Strict Business Rules**:
-   - **One WFH Day per User per Week**: Enforced atomically via backend transactions.
+   - **Multi-Day & Full-Week WFH Registrations**: Users can register for any or all available weekdays in a week; duplicate registrations on the same date are prevented atomically via backend transactions.
    - **Weekend Lockout**: Saturday and Sunday registrations are completely blocked.
    - **Cancel Guard**: Users can only cancel future WFH registrations; past and same-day registrations are locked.
 3. **Multi-Density Calendar Views**: View schedules in **Monthly** (dynamic 4–6 week view), **Biweekly** (2 weeks), or **Weekly** (1 week) layouts.

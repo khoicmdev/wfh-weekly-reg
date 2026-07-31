@@ -28,8 +28,7 @@ interface DayColumnProps {
   isWeekend: boolean;
   isOutsideMonth: boolean;
   entries: ScheduleEntry[];
-  currentUserEntry: ScheduleEntry | null;
-  currentUserAlreadyRegisteredThisWeek: boolean;
+  currentUid?: string;
   weekQueryKey: readonly unknown[];
 }
 
@@ -38,8 +37,7 @@ function DayColumn({
   isWeekend,
   isOutsideMonth,
   entries,
-  currentUserEntry,
-  currentUserAlreadyRegisteredThisWeek,
+  currentUid,
   weekQueryKey,
 }: DayColumnProps) {
   const [registerOpen, setRegisterOpen] = useState(false);
@@ -52,7 +50,8 @@ function DayColumn({
   const todayUTC = new Date(Date.UTC(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate()));
   const isToday = date.getTime() === todayUTC.getTime();
 
-  const canRegister = !isWeekend && !isOutsideMonth && !currentUserAlreadyRegisteredThisWeek && isFuture;
+  const currentUserEntry = currentUid ? entries.find((e) => e.uid === currentUid) ?? null : null;
+  const canRegister = !isWeekend && !isOutsideMonth && currentUserEntry === null && isFuture;
   const canCancel = currentUserEntry !== null && isFutureDDMMYYYY(currentUserEntry.wfhDate);
 
   // A column is disabled if it's a weekend, outside the active month, or has no available actions
@@ -196,9 +195,6 @@ export function WeekBoard({ weekInfo, activeMonth }: WeekBoardProps) {
     entriesByDate[isoKey].push(entry);
   }
 
-  // Check if current user already has a registration this week
-  const currentUserEntry = schedules.find((s) => s.uid === currentUid) ?? null;
-
   // Build the 7 days (Mon–Sun)
   const monday = getMondayOfISOWeek(weekInfo.year, weekInfo.weekNumber);
   const days = Array.from({ length: 7 }, (_, i) => {
@@ -244,12 +240,7 @@ export function WeekBoard({ weekInfo, activeMonth }: WeekBoardProps) {
                 isWeekend={isWeekend}
                 isOutsideMonth={isOutsideMonth}
                 entries={entries}
-                currentUserEntry={
-                  !isWeekend && !isOutsideMonth && currentUserEntry?.wfhDate === formatDDMMYYYY(date)
-                    ? currentUserEntry
-                    : null
-                }
-                currentUserAlreadyRegisteredThisWeek={currentUserEntry !== null}
+                currentUid={currentUid}
                 weekQueryKey={weekQueryKey}
               />
             );

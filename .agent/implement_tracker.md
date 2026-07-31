@@ -13,6 +13,7 @@
 | Self-registration | Any valid email can register |
 | Date/Time | English UI, all dates/times in **GMT+7 (Asia/Ho_Chi_Minh)** |
 | Cancel/Edit WFH | Allowed **before the WFH day arrives** (server-enforced) |
+| WFH Registration Limit | Full-week & multi-day WFH registrations allowed (per-date duplicate check) |
 | Deployment — Frontend | **Firebase Hosting** |
 | Deployment — Backend | **Firebase Cloud Functions v2** (`asia-southeast1`) |
 | Firebase project | `wfh-weekly-register` |
@@ -86,7 +87,7 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 - [x] **[NEW] `src/lib/date.util.test.ts`** — unit tests for date & color utilities (5 passing tests via `npm test`)
 - [x] **[NEW] `src/routes/schedule.routes.ts`** — endpoints:
   - `GET /api/v1/schedules?year=&weekNumber=` *(protected)* — team schedule annotated with colors
-  - `POST /api/v1/schedules` *(protected)* — body `{ wfhDate }`: validate date, reject weekend (400), reject duplicate user+week (409), assign `registrationOrder`, save to Firestore
+  - `POST /api/v1/schedules` *(protected)* — body `{ wfhDate }`: validate date, reject weekend (400), reject duplicate user+date (409), assign `registrationOrder`, save to Firestore (allows full-week & multi-day WFH registrations)
   - `DELETE /api/v1/schedules/:id` *(protected)* — reject if date is today/past (400), verify ownership (403), delete
 - [x] **[NEW] `src/routes/dashboard.routes.ts`** — `GET /api/v1/dashboard/stats` *(protected)*: `{ nextWfhDate, wfhDaysCountThisMonth, wfhDaysCountThisYear }` in GMT+7
 - [x] **[MODIFY] `src/server.ts`** — mount `scheduleRouter`, `dashboardRouter`
@@ -179,7 +180,7 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
   - Mon–Fri: active — FCFS color chips + "Register" button in footer
   - Sat–Sun: greyed out, "N/A", no buttons
   - Today column highlighted in blue
-  - "Register" disabled/hidden if current user already registered that week
+  - "Register" button enabled for any weekday where user has not yet registered (multi-day / full week WFH registration supported)
   - Future registration owned by current user shows "Cancel WFH" link
   - Past & today entries shown without cancel
   - Fetches `GET /api/v1/schedules?year=&weekNumber=` (refetches on week change)

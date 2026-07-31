@@ -139,10 +139,12 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
 
       const snapshot = await transaction.get(query);
 
-      // Check duplicate registration for this user in this week
-      const existingUserSchedule = snapshot.docs.find((doc) => doc.data().uid === uid);
-      if (existingUserSchedule) {
-        throw new Error("DUPLICATE_WEEK_REGISTRATION");
+      // Check duplicate registration for this user on this specific date
+      const existingUserDateSchedule = snapshot.docs.find(
+        (doc) => doc.data().uid === uid && doc.data().wfhDate === wfhDate,
+      );
+      if (existingUserDateSchedule) {
+        throw new Error("DUPLICATE_DATE_REGISTRATION");
       }
 
       // Fetch user profile for latest displayName
@@ -177,8 +179,8 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
       schedule: result,
     });
   } catch (err: unknown) {
-    if (err instanceof Error && err.message === "DUPLICATE_WEEK_REGISTRATION") {
-      res.status(409).json({ error: "You have already registered a WFH day for this week." });
+    if (err instanceof Error && err.message === "DUPLICATE_DATE_REGISTRATION") {
+      res.status(409).json({ error: "You have already registered for WFH on this date." });
       return;
     }
     console.error("[create-schedule]", err);
