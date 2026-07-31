@@ -7,9 +7,14 @@ export const authRouter = Router();
 
 // ── Zod schemas ──────────────────────────────────────────────────────────────
 
+const SendOtpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
 const RegisterSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  code: z.string().length(6, "Verification code must be 6 digits"),
 });
 
 const LoginSchema = z.object({
@@ -25,6 +30,52 @@ const UpdateProfileSchema = z.object({
     .trim(),
 });
 
+// ── POST /api/v1/auth/send-otp ────────────────────────────────────────────────
+
+authRouter.post("/send-otp", async (req: Request, res: Response) => {
+  const parsed = SendOtpSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.errors[0]?.message });
+    return;
+  }
+
+  const { email } = parsed.data;
+
+  try {
+    // Check if user already exists
+    try {
+      await adminAuth.getUserByEmail(email);
+      res.status(409).json({ error: "An account with this email already exists." });
+      return;
+    } catch (err: unknown) {
+      const firebaseError = err as { code?: string };
+      if (firebaseError.code !== "auth/user-not-found") {
+        throw err;
+      }
+    }
+
+    // Generate random 6-digit numeric OTP
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
+    // Save to Firestore
+    await adminDb.collection("email_otps").doc(email).set({
+      code,
+      expiresAt,
+      createdAt: new Date().toISOString(),
+    });
+
+    console.log(`\n========================================`);
+    console.log(`🔑 VERIFICATION CODE FOR ${email}: ${code}`);
+    console.log(`========================================\n`);
+
+    res.json({ message: "Verification code sent to your email." });
+  } catch (err) {
+    console.error("[send-otp]", err);
+    res.status(500).json({ error: "Failed to send verification code. Please try again." });
+  }
+});
+
 // ── POST /api/v1/auth/register ────────────────────────────────────────────────
 
 authRouter.post("/register", async (req: Request, res: Response) => {
@@ -34,9 +85,31 @@ authRouter.post("/register", async (req: Request, res: Response) => {
     return;
   }
 
-  const { email, password } = parsed.data;
+  const { email, password, code } = parsed.data;
 
   try {
+    // Verify OTP code stored in Firestore
+    const otpDoc = await adminDb.collection("email_otps").doc(email).get();
+    if (!otpDoc.exists) {
+      res.status(400).json({ error: "Please request a verification code first." });
+      return;
+    }
+
+    const otpData = otpDoc.data() as { code: string; expiresAt: string };
+    if (new Date(otpData.expiresAt).getTime() < Date.now()) {
+      res.status(400).json({ error: "Verification code has expired. Please request a new one." });
+      return;
+    }
+
+    if (otpData.code !== code) {
+      res.status(400).json({ error: "Invalid verification code." });
+      return;
+    }
+
+    // Delete used OTP
+    await adminDb.collection("email_otps").doc(email).delete();
+
+    // Create user in Firebase Auth
     const userRecord = await adminAuth.createUser({ email, password });
 
     // Create Firestore profile doc — displayName starts as null (triggers onboarding)

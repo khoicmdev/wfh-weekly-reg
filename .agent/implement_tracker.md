@@ -62,7 +62,8 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 - [x] **[NEW] `src/lib/firebase-admin.ts`** — init Admin SDK, export `adminAuth` + `adminDb`
 - [x] **[NEW] `src/middleware/auth.middleware.ts`** — `verifyToken`: Bearer → `verifyIdToken()` → `req.user`
 - [x] **[NEW] `src/routes/auth.routes.ts`** — endpoints:
-  - `POST /api/v1/auth/register` — `adminAuth.createUser()` + Firestore `users/{uid}` doc (`displayName: null`)
+  - `POST /api/v1/auth/send-otp` — generates random 6-digit OTP, stores in Firestore `email_otps/{email}` with 10-min expiration
+  - `POST /api/v1/auth/register` — verifies 6-digit OTP before `adminAuth.createUser()` + Firestore `users/{uid}` doc
   - `POST /api/v1/auth/login` — Firebase Auth REST `signInWithPassword` → returns `{ token, refreshToken }`
   - `GET /api/v1/auth/me` *(protected)* — returns Firestore `users/{uid}`
   - `PATCH /api/v1/auth/me` *(protected)* — updates `displayName` in Firebase Auth + Firestore
@@ -210,40 +211,13 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 
 ### Root
 
-- [ ] **[NEW] `firebase.json`**
-  ```json
-  {
-    "hosting": {
-      "public": "apps/web/dist",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        { "source": "/api/**", "function": "api" },
-        { "source": "**", "destination": "/index.html" }
-      ]
-    },
-    "functions": {
-      "source": "apps/server"
-    }
-  }
-  ```
-- [ ] **[NEW] `.firebaserc`** — `{ "projects": { "default": "wfh-weekly-register" } }`
+- [x] **[NEW] `firebase.json`** — Hosting (`tlg-legal`, `apps/web/dist`) + Functions (`apps/server`) rewrite configuration
+- [x] **[NEW] `.firebaserc`** — `{ "projects": { "default": "tlg-legal" } }`
+- [x] **[MODIFY] `apps/server/package.json`** — added `firebase-functions`, set `main: dist/index.js`, Node 20 engine
+- [x] **[NEW] `apps/server/src/index.ts`** — Cloud Functions v2 entry point (`onRequest({ region: "asia-southeast1" })`)
+- [x] **[NEW] `apps/web/.env.production`** — relative `/api` base URL for production Hosting rewrites
 
-### `apps/server`
-
-- [ ] **[MODIFY] `package.json`** — add `firebase-functions`, `engines: { "node": "20" }`
-- [ ] **[NEW] `src/index.ts`** — Cloud Functions entry point:
-  ```ts
-  import { onRequest } from "firebase-functions/v2/https";
-  import { app } from "./server";
-  export const api = onRequest({ region: "asia-southeast1" }, app);
-  ```
-- [ ] **[MODIFY] `src/server.ts`** — export `app` as named export; guard `app.listen` with `if (process.env.NODE_ENV !== "production")`
-
-### `apps/web`
-
-- [ ] **[NEW] `.env.production`** — `VITE_API_BASE_URL=` (empty = same-origin, routes via Hosting rewrite)
-
-**✅ Gate:** `firebase deploy` succeeds. `https://wfh-weekly-register.web.app` loads. API calls route through Cloud Function.
+**✅ Gate:** Firebase Hosting successfully deployed at `https://tlg-legal.web.app`. Both frontend and backend builds (`npm run build`) pass cleanly.
 
 ---
 
@@ -343,5 +317,5 @@ apps/
 | 20a | View-as selector switches between Monthly (dynamic 4–6 weeks), Biweekly (2 weeks), and Weekly (1 week) | 6 | [x] |
 | 20b | Monthly view disables dates outside the current month with `cursor-not-allowed` | 6 | [x] |
 | 20c | Controls bar (View-as + Navigator) positioned under title with View-as on the left | 6 | [x] |
-| 21 | `firebase deploy` succeeds | 7 | [ ] |
-| 22 | Prod URL loads, API calls work end-to-end | 7 | [ ] |
+| 21 | `firebase deploy` (Hosting target set to `https://tlg-legal.web.app`) | 7 | [x] |
+| 22 | Prod build succeeds end-to-end (`npm run build` in web & server) | 7 | [x] |

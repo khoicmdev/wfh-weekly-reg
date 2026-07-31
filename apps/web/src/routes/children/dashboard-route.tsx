@@ -108,7 +108,7 @@ function DashboardPage() {
       )}
 
       {/* Metric cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="flex flex-col gap-4">
         {isLoading ? (
           <>
             <StatCardSkeleton />

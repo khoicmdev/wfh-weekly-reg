@@ -1,0 +1,131 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  # ── 1. LINT & TYPECHECK ───────────────────────────────────────────────────
+  lint:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+  # ── 2. BUILD ──────────────────────────────────────────────────────────────
+  build:
+    name: Build Applications
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build apps
+        run: npm run build
+
+      - name: Upload web dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+          retention-days: 1
+
+      - name: Upload server dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-dist
+          path: apps/server/dist
+          retention-days: 1
+
+  # ── 3A. DEPLOY FRONTEND (HOSTING) — PARALLEL ──────────────────────────────
+  deploy-frontend:
+    name: Deploy Frontend (Firebase Hosting)
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download web dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+
+      - name: Authenticate to Google Cloud / Firebase
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Deploy Hosting to Firebase
+        run: npx firebase-tools deploy --only hosting --project wfh-weekly-register
+
+  # ── 3B. DEPLOY BACKEND (FUNCTIONS) — PARALLEL ─────────────────────────────
+  deploy-backend:
+    name: Deploy Backend (Firebase Functions)
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download server dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: server-dist
+          path: apps/server/dist
+
+      - name: Authenticate to Google Cloud / Firebase
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Deploy Cloud Functions to Firebase
+        run: npx firebase-tools deploy --only functions --project wfh-weekly-register
