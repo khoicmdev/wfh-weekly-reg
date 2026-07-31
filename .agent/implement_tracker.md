@@ -156,28 +156,51 @@ Firebase Hosting ──rewrite /api/**──► Cloud Function "api" (Express v2
 
 ## Phase 6 — Frontend Register WFH Tab (Weekly Board)
 
-**Goal:** Full weekly board UI — week navigation, team grid, color chips, register/cancel.
+**Goal:** Full weekly board UI — view mode selector, multi-row week grid, color chips, register/cancel.
+
+### View modes
+
+| Mode | Rows shown | Navigator label |
+|---|---|---|
+| **Monthly** (default) | Dynamic 4–6 rows (all ISO weeks spanning the 1st to the last day of the target month; dates outside the active month are disabled with `cursor-not-allowed`) | `« »` navigates by month, label shows month name |
+| **Biweekly** | 2 rows (2 consecutive weeks) | `‹ ›` navigates by 2 weeks, label shows "Week N – Week N+1" |
+| **Weekly** | 1 row (1 week) | `‹ ›` navigates by 1 week, label shows "Week N · Mon – Sun, YYYY" |
 
 ### `apps/web`
 
-- [ ] **[NEW] `src/components/wfh/week-selector.tsx`**
-  - Shows "Week 32 · Aug 3 – Aug 9, 2026"
-  - `<` / `>` week navigation, calendar popover for date jump
-  - Drives `currentWeekAtom` (`{ year, weekNumber, startDate, endDate }`)
-- [ ] **[NEW] `src/components/wfh/color-badge.tsx`** — pill with colored dot + display name
+- [x] **[NEW] `src/components/wfh/week-utils.ts`** — shared types + frontend ISO week helpers, date formatters, `getCurrentWeekInfo()`
+- [x] **[NEW] `src/components/wfh/color-badge.tsx`** — pill with colored dot + display name
   - Colors: Blue `#3B82F6` · Yellow `#EAB308` · Green `#22C55E` · Purple `#A855F7` · Orange `#F97316`
-- [ ] **[NEW] `src/components/wfh/week-board.tsx`**
+- [x] **[NEW] `src/components/wfh/week-board.tsx`**
   - 7-column grid (Mon–Sun), Google Calendar–style
-  - Mon–Fri: active — registration chips + "Register" button in footer
+  - Mon–Fri: active — FCFS color chips + "Register" button in footer
   - Sat–Sun: greyed out, "N/A", no buttons
-  - "Register" disabled if current user already registered that week
-  - Future registration owned by current user shows "Cancel" link
+  - Today column highlighted in blue
+  - "Register" disabled/hidden if current user already registered that week
+  - Future registration owned by current user shows "Cancel WFH" link
+  - Past & today entries shown without cancel
   - Fetches `GET /api/v1/schedules?year=&weekNumber=` (refetches on week change)
-- [ ] **[NEW] `src/components/wfh/register-dialog.tsx`** — "Register WFH for [Day, Date]?" confirmation → `POST /api/v1/schedules` → invalidate cache
-- [ ] **[NEW] `src/components/wfh/cancel-dialog.tsx`** — "Cancel WFH on [Day, Date]?" confirmation → `DELETE /api/v1/schedules/:id` → invalidate cache
-- [ ] **[MODIFY] `src/routes/children/register-wfh-route.tsx`** — compose `<WeekSelector />` + `<WeekBoard />`
+  - Skeleton loaders while fetching; error banner on failure
+- [x] **[NEW] `src/components/wfh/register-dialog.tsx`** — "Register WFH for [Day, Date]?" confirmation → `POST /api/v1/schedules` → invalidate week + dashboard cache
+- [x] **[NEW] `src/components/wfh/cancel-dialog.tsx`** — "Cancel WFH on [Day, Date]?" confirmation → `DELETE /api/v1/schedules/:id` → invalidate week + dashboard cache
 
-**✅ Gate:** Colors correct per FCFS. Register → board updates. Cancel future day → chip removed. Past chips no Cancel. Sat/Sun blocked.
+#### New — View Mode feature
+
+- [x] **[MODIFY] `src/components/wfh/week-selector.tsx`** → refactored into **`board-header.tsx`**
+  - **`View as`** dropdown select: `Monthly` (default) / `Biweekly` / `Weekly`
+  - Navigator `‹ / ›` arrow logic adapts to selected mode:
+    - **Weekly**: step ±1 week, label = "Week 32 · Aug 3 – Aug 9, 2026"
+    - **Biweekly**: step ±2 weeks, label = "Week 32 – 33 · Aug 3 – Aug 16, 2026"
+    - **Monthly**: step ±1 month, label = "August 2026"
+  - **"Today"** jump shortcut shown when not on current period
+- [x] **[MODIFY] `src/routes/children/register-wfh-route.tsx`**
+  - Owns `viewMode` state (`"weekly" | "biweekly" | "monthly"`, default `"monthly"`)
+  - Owns `monthState` and `anchorWeek` navigation state
+  - Dynamically computes `WeekInfo[]` array (1 row for weekly, 2 rows for biweekly, dynamic 4–6 rows spanning the entire month for monthly)
+  - Renders `<BoardHeader>` below page title/subtitle + `N × <WeekBoard>` rows stacked vertically
+  - Passes `activeMonth` constraint to `<WeekBoard>` when in monthly mode
+
+**✅ Gate:** Monthly view shows dynamic 4–6 week rows covering all days of the month (dates outside the month disabled with cursor-not-allowed). Biweekly shows 2 rows. Weekly shows 1 row. Controls bar positioned under title with View-as on the left. Register/cancel still works per row.
 
 ---
 
@@ -275,7 +298,8 @@ apps/
           display-name-dialog.tsx                   [NEW — Phase 4]
           user-settings-dialog.tsx                  [NEW — Phase 4]
         wfh/
-          week-selector.tsx                         [NEW — Phase 6]
+          week-utils.ts                             [NEW — Phase 6]
+          board-header.tsx                          [NEW — Phase 6]
           week-board.tsx                            [NEW — Phase 6]
           color-badge.tsx                           [NEW — Phase 6]
           register-dialog.tsx                       [NEW — Phase 6]
@@ -312,9 +336,12 @@ apps/
 | 14 | Sidebar user click → settings dialog pre-filled, change works | 4 | [x] |
 | 15 | Logout → token cleared → `/login` | 4 | [x] |
 | 16 | Dashboard shows correct stats from API | 5 | [x] |
-| 17 | Week board shows correct FCFS colors | 6 | [ ] |
-| 18 | Register on weekday → board updates, button disabled for week | 6 | [ ] |
-| 19 | Cancel future WFH → chip removed from board | 6 | [ ] |
-| 20 | Sat/Sun columns fully blocked | 6 | [ ] |
+| 17 | Week board shows correct FCFS colors | 6 | [x] |
+| 18 | Register on weekday → board updates, button disabled for week | 6 | [x] |
+| 19 | Cancel future WFH → chip removed from board | 6 | [x] |
+| 20 | Sat/Sun columns fully blocked | 6 | [x] |
+| 20a | View-as selector switches between Monthly (dynamic 4–6 weeks), Biweekly (2 weeks), and Weekly (1 week) | 6 | [x] |
+| 20b | Monthly view disables dates outside the current month with `cursor-not-allowed` | 6 | [x] |
+| 20c | Controls bar (View-as + Navigator) positioned under title with View-as on the left | 6 | [x] |
 | 21 | `firebase deploy` succeeds | 7 | [ ] |
 | 22 | Prod URL loads, API calls work end-to-end | 7 | [ ] |
